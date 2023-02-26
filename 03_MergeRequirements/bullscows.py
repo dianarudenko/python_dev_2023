@@ -2,7 +2,21 @@ from random import choice
 from argparse import ArgumentParser
 import os
 from urllib import request
-from cowsay import cowsay
+from cowsay import cowsay, read_dot_cow
+from io import StringIO
+
+cow = read_dot_cow(StringIO("""
+$the_cow = <<EOC;
+         $thoughts    ____    
+           ／＞　  フ
+　　　　　(   0  0 )
+　 　　　／`ミ _x_ 彡
+　　 　 /　　　   |
+　　　 /　  ヽ 　 ﾉ
+　 /￣|　　  | | |
+　(_(￣ヽ＿＿ヽ_)_)
+EOC
+"""))
 
 def bullscows(guess: str, secret: str) -> (int, int):
     bulls, cows = 0, 0
@@ -15,23 +29,23 @@ def bullscows(guess: str, secret: str) -> (int, int):
 
 
 def ask(prompt: str, valid: list[str] = None) -> str:
-    print(cowsay(prompt))
+    print(cowsay(prompt, cowfile=cow))
     word = input()
     if valid:
         while not word in valid:
             print('Плохое слово, попробуйте снова')
-            print(cowsay(prompt))
+            print(cowsay(prompt, cowfile=cow))
             word = input()
     else:
         while len(word) != args.length:
             print(f'Слово должно быть длины {args.length}, попробуйте снова')
-            print(cowsay(prompt))
+            print(cowsay(prompt, cowfile=cow))
             word = input()
     return word
 
 
 def inform(format_string: str, bulls: int, cows: int) -> None:
-    print(cowsay(format_string.format(bulls, cows)))
+    print(cowsay(format_string.format(bulls, cows), cowfile=cow))
     
 
 def gameplay(ask: callable, inform: callable, words: list[str]) -> int:
