@@ -2,6 +2,7 @@ from random import choice
 from argparse import ArgumentParser
 import os
 from urllib import request
+from cowsay import cowsay
 
 def bullscows(guess: str, secret: str) -> (int, int):
     bulls, cows = 0, 0
@@ -14,20 +15,23 @@ def bullscows(guess: str, secret: str) -> (int, int):
 
 
 def ask(prompt: str, valid: list[str] = None) -> str:
-    word = input(prompt)
+    print(cowsay(prompt))
+    word = input()
     if valid:
         while not word in valid:
             print('Плохое слово, попробуйте снова')
-            word = input(prompt)
+            print(cowsay(prompt))
+            word = input()
     else:
         while len(word) != args.length:
             print(f'Слово должно быть длины {args.length}, попробуйте снова')
-            word = input(prompt)
+            print(cowsay(prompt))
+            word = input()
     return word
 
 
 def inform(format_string: str, bulls: int, cows: int) -> None:
-    print(format_string.format(bulls, cows))
+    print(cowsay(format_string.format(bulls, cows)))
     
 
 def gameplay(ask: callable, inform: callable, words: list[str]) -> int:
@@ -56,7 +60,7 @@ if __name__ == '__main__':
             with request.urlopen(args.dict) as inp:
                 dictionary = inp.read().decode('utf-8').split()
         except:
-            print('Невалидная URL')
+            print('Невозможно получить дуступ к словарю: неверный путь или URL')
     dictionary = [word for word in dictionary if len(word) == args.length]
     if dictionary == []:
         print('Пустой словарь доступных слов, игра невозможна')
