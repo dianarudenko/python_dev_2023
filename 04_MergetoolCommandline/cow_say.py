@@ -1,6 +1,7 @@
 import cmd
 import cowsay
 import shlex
+import re
 
 class CommandLine(cmd.Cmd):
     intro = '''Welcome to the cowsay-cmd! Please, enter your command.
@@ -121,6 +122,9 @@ words it should be wrapped in quotes.
                     self.bad_params(func_name)
                     return
                 i += 1
+            if message is None:
+                self.bad_params(func_name)
+                return
             print(func(message, **params))
         else:
             self.bad_params(func_name)
@@ -159,10 +163,57 @@ default cow is used.
             -t tongue: Spesifies the tongue pattern to use. Default value is `  `.'''
         self.cowdo(args, cowsay.cowthink, 'cowthink')
 
+
+    def complete_list_cows(self, text, line, begidx, endidx):
+        if re.fullmatch(r'list_cows\s+-', line[:endidx]):
+            return ['f']
+        return []
+
+
+    def complete_make_bubble(self, text, line, begidx, endidx):
+        if re.fullmatch(r'make_bubble\s+-', line[:endidx]):
+            return ['b', 'w', 'n']
+        elif re.fullmatch(r'.+?\s+-b\s+\S*', line[:begidx]):
+            match = re.match(r'.+?\s+-b\s+', line[:begidx])
+            real_text = line[match.end():endidx]
+            return [mode for mode in ('say', 'think') if mode.startswith(real_text)]
+        return []
+
+    
+    def cowdo_complete(self, text, line, begidx, endidx, func_name):
+        if re.fullmatch(func_name + r'\s+-', line[:endidx]):
+            return ['c', 'e', 't']
+        elif re.fullmatch(r'.+?\s+-c\s+\S*', line[:begidx]):
+            match = re.match(r'.+?\s+-c\s+', line[:begidx])
+            real_text = line[match.end():endidx]
+            if real_text:
+                return [cow for cow in cowsay.list_cows() if cow.startswith(real_text)]
+            else:
+                # there are too many options so show just few of them
+                return ['default', 'cat', 'owl', '...']
+        elif re.fullmatch(r'.+?\s+-e\s+\S*', line[:begidx]):
+            match = re.match(r'.+?\s+-e\s+', line[:begidx])
+            real_text = line[match.end():endidx]
+            options = ('oo', '==', 'XX', '$$', '@@', '**', '--', 'OO', '..')
+            return [eyes for eyes in options if eyes.startswith(real_text)]
+        elif re.fullmatch(r'.+?\s+-t\s+\S*', line[:begidx]):
+            options = ('lJ', 'll', 'LJ', 'II', 'U ')
+            return [tongue for tongue in options if tongue.startswith(text)]
+        return []
+
+
+    def complete_cowsay(self, text, line, begidx, endidx):
+        return self.cowdo_complete(text, line, begidx, endidx, 'cowsay')
+    
+
+    def complete_cowthink(self, text, line, begidx, endidx):
+        return self.cowdo_complete(text, line, begidx, endidx, 'cowthink')
+        
+
     def do_quit(self, args):
         '''Quit the program'''
         return 1
 
 if __name__ == '__main__':
-    cmdline = CommandLine(completekey='tab')
+    cmdline = CommandLine()
     cmdline.cmdloop()
