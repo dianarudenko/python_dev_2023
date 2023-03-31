@@ -12,16 +12,16 @@ async def chat(reader, writer):
         request = shlex.split(request.decode())
         if len(request) == 1:
             if request[0] == 'who':
-                writer.write('Current users of the chat:\n'.encode())
+                response = 'Current users of the chat:\n'
                 for client in clients:
-                    writer.write((client + '\n').encode())
-                writer.write('\n'.encode())
+                    response += client + '\n'
+                writer.write((response +'\n').encode())
                 await writer.drain()
             elif request[0] == 'cows':
-                writer.write('Available cownames to register with:\n'.encode())
+                response = 'Available cownames to register with:\n'
                 for cowname in cows:
-                    writer.write((cowname + '\n').encode())
-                writer.write('\n'.encode())
+                    response += cowname + '\n'
+                writer.write((response + '\n').encode())
                 await writer.drain()
             elif request[0] == 'quit':
                 writer.write('Goodbye!\n'.encode())
@@ -58,16 +58,16 @@ async def chat(reader, writer):
                 length = len(request)
                 if length == 1:
                     if request[0] == 'who':
-                        writer.write('Current users of the chat:\n'.encode())
+                        response = 'Current users of the chat:\n'
                         for client in clients:
-                            writer.write((client + '\n').encode())
-                        writer.write('\n'.encode())
+                            response += client + '\n'
+                        writer.write((response +'\n').encode())
                         await writer.drain()
                     elif request[0] == 'cows':
-                        writer.write('Available cownames to register with:\n'.encode())
+                        response = 'Available cownames to register with:\n'
                         for cowname in cows:
-                            writer.write((cowname + '\n').encode())
-                        writer.write('\n'.encode())
+                            response += cowname + '\n'
+                        writer.write((response + '\n').encode())
                         await writer.drain()
                     elif request[0] == 'quit':
                         send.cancel()

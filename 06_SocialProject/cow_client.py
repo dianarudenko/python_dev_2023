@@ -11,6 +11,9 @@ class CowClient(cmd.Cmd):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect(('localhost', 1337))
         self.prompt = '> '
+        self.response = ''
+        self.inner = False
+        self.wait = True
 
     def do_cows(self, args):
         '''
@@ -70,22 +73,39 @@ class CowClient(cmd.Cmd):
         Parameters:
             msg: a message to send'''
         self.sock.send(("yield " + args + '\n').encode())
+    
+    def complete_login(self, text, line, begidx, endidx):
+        self.inner = True
+        self.sock.send("cows\n".encode())
+        while self.wait:
+            pass
+        self.wait = True
+        self.inner = False
+        cows = (self.response).split('\n')[1:]
+        return [cow for cow in cows if cow.startswith(text)]
+    
+    def complete_say(self, text, line, begidx, endidx):
+        self.inner = True
+        self.sock.send("who\n".encode())
+        while self.wait:
+            pass
+        self.wait = True
+        self.inner = False
+        users = (self.response).split('\n')[1:]
+        return [user for user in users if user.startswith(text)]
 
     def recv(self):
         while True:
-            msg = self.sock.recv(1024).decode()
-            try:
-                while True:
-                    buf = self.sock.recv(1024, socket.MSG_DONTWAIT).decode()
-                    if buf:
-                        msg += buf
-                    else:
-                        break
-            except:
-                pass
+            msg = self.sock.recv(1024).decode().strip()
             if msg == "":
                 break
-            print(f"\n{msg}\n{cmdline.prompt}{readline.get_line_buffer()}", end="", flush=True)
+            if self.inner:
+                self.response = msg
+                self.wait = False
+            else:
+                print(f"\n{msg}\n{cmdline.prompt}{readline.get_line_buffer()}",
+                      end="",
+                      flush=True)
         
 
 if __name__ == '__main__':
